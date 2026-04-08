@@ -3,7 +3,7 @@ on: [workflow_dispatch]
 
 jobs:
   build:
-    runs-on: windows-latest 
+    runs-on: windows-latest
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -13,18 +13,19 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Install WDK (Lightweight)
+    - name: Install Missing Kernel Headers
       
-      run: choco install windows-driver-kit-10 -y --no-progress
+      run: |
+        choco install visualstudio2019-workload-vctools -y --no-progress
 
     - name: Build Solution
       
-      run: msbuild VmLoader.sln /p:Configuration=Release /p:Platform=x64
+      run: msbuild VmLoader.sln /p:Configuration=Release /p:Platform=x64 /p:WindowsTargetPlatformVersion=10.0.19041.0
 
-    - name: Archive Production Artifacts
+    - name: Archive Results
       uses: actions/upload-artifact@v4
       with:
-        name: My-Custom-Loader
+        name: Hardened-Loader-Files
         path: |
-          x64/Release/VmLoader.exe
-          x64/Release/VmLoader.sys
+          **/Release/*.exe
+          **/Release/*.sys
