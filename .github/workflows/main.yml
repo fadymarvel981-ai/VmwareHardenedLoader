@@ -3,7 +3,7 @@ on: [workflow_dispatch]
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -12,6 +12,9 @@ jobs:
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
+
+    - name: Install WDK
+      run: choco install windows-driver-kit -y
 
     - name: Build Solution
       run: msbuild VmLoader.sln /p:Configuration=Release /p:Platform=x64
