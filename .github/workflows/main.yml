@@ -3,7 +3,7 @@ on: [workflow_dispatch]
 
 jobs:
   build:
-    runs-on: windows-2022 
+    runs-on: windows-latest
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -13,17 +13,25 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Retarget and Build
+    - name: Strip Kernel Dependency
+      shell: pwsh
       run: |
-        
-        msbuild VmLoader.sln /t:Retarget /p:Configuration=Release /p:Platform=x64
+        Get-ChildItem -Recurse -Filter *.vcxproj | ForEach-Object {
+          (Get-Content $_.FullName) -replace 'CAPSTONE_WINKERNEL;', '' | Set-Content $_.FullName
+        }
 
-        msbuild VmLoader.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143
+    - name: Build Solution
+      run: |
+        msbuild VmLoader.sln `
+        /p:Configuration=Release `
+        /p:Platform=x64 `
+        /p:WindowsTargetPlatformVersion=10.0 `
+        /p:PlatformToolset=v143
 
     - name: Archive Results
       uses: actions/upload-artifact@v4
       with:
-        name: Hardened-Loader
+        name: My-Hardened-Loader
         path: |
           **\Release\VmLoader.exe
           **\Release\VmLoader.sys
