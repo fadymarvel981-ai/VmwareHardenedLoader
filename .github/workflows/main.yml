@@ -13,10 +13,12 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Install WDK
-      run: choco install windows-driver-kit -y
+    - name: Install WDK (Lightweight)
+      
+      run: choco install windows-driver-kit-10 -y --no-progress
 
     - name: Build Solution
+      
       run: msbuild VmLoader.sln /p:Configuration=Release /p:Platform=x64
 
     - name: Archive Production Artifacts
