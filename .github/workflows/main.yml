@@ -13,20 +13,26 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Build Solution
-      
+    - name: Detect SDK and Build
+      shell: pwsh
       run: |
+        
+        $sdkPath = "C:\Program Files (x86)\Windows Kits\10\Include\"
+        $sdkVersion = (Get-ChildItem $sdkPath | Where-Object { $_.Name -match '^10\.0\.' } | Sort-Object Name -Descending | Select-Object -First 1).Name
+        
+        Write-Host "Detected SDK Version on Server: $sdkVersion"
+        
+       
         msbuild VmLoader.sln `
-        /p:Configuration=Release `
-        /p:Platform=x64 `
-        /p:WindowsTargetPlatformVersion=10.0.19041.0 `
-        /p:PlatformToolset=v143 `
-        /p:TargetContext=Driver
+          /p:Configuration=Release `
+          /p:Platform=x64 `
+          /p:WindowsTargetPlatformVersion=$sdkVersion `
+          /p:PlatformToolset=v143
 
-    - name: Archive Production Artifacts
+    - name: Archive Results
       uses: actions/upload-artifact@v4
       with:
-        name: My-Hardened-Loader
+        name: Hardened-Loader-Final
         path: |
           **\x64\Release\VmLoader.exe
           **\x64\Release\VmLoader.sys
